@@ -1,347 +1,76 @@
-﻿<!DOCTYPE html>
-<html lang="mk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Manager Dashboard</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+﻿
 
-        body {
-            background-color: #f4f7fe;
-            color: #2b3674;
-            padding: 20px;
-        }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    
+    
+    Product Manager Dashboard - Live DB
+    
+    
 
-        h1 {
-            margin-bottom: 24px;
-            font-size: 26px;
-        }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .card h2 {
-            font-size: 18px;
-            margin-bottom: 16px;
-            color: #1b2559;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            outline: none;
-            font-size: 14px;
-        }
-
-        .form-group input:focus {
-            border-color: #4318ff;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-
-        .btn-primary {
-            background-color: #4318ff;
-            color: white;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            background-color: #3311cc;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-
-        .btn-danger {
-            background-color: #ea5455;
-            color: white;
-            padding: 5px 8px;
-            font-size: 12px;
-        }
-
-        .btn-danger:hover {
-            background-color: #c43d3e;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e5f2;
-            font-size: 13px;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            color: #8f9bba;
-            font-weight: 600;
-        }
-
-        .badge-profit-pos {
-            color: #2e7d32;
-            font-weight: bold;
-        }
-
-        .badge-profit-neg {
-            color: #c62828;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Dashboard - Управување со Производи и Профит</h1>
+    
+        Dashboard - База во Облак (Трајни Податоци)
         
-        <div class="dashboard-grid">
-            <!-- Форма за внес -->
-            <div class="card form-card">
-                <h2>Внес / Ажурирање на Продукт</h2>
-                <form id="productForm">
-                    <div class="form-group">
-                        <label for="product">Продукт:</label>
-                        <input type="text" id="product" required placeholder="Нпр. Лаптоп Dell">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="buyQty">Купена количина:</label>
-                            <input type="number" id="buyQty" min="0" required placeholder="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="buyPrice">Набавна цена (ден):</label>
-                            <input type="number" id="buyPrice" step="0.01" min="0" required placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="sellQty">Продадено количество:</label>
-                            <input type="number" id="sellQty" min="0" required placeholder="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="sellPrice">Продажна цена (ден):</label>
-                            <input type="number" id="sellPrice" step="0.01" min="0" required placeholder="0.00">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Додај во Табела</button>
-                </form>
-            </div>
-
-            <!-- Табела со податоци -->
-            <div class="card table-card">
-                <div class="table-header">
-                    <h2>Преглед на Залиха и Профит</h2>
-                    <button id="downloadJsonBtn" class="btn btn-secondary">Зачувај JSON</button>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Продукт</th>
-                                <th>Купено</th>
-                                <th>Набавна</th>
-                                <th>Вкупно Набавено</th>
-                                <th>Продадено</th>
-                                <th>Продажна</th>
-                                <th>Вкупен Приход</th>
-                                <th>Залиха</th>
-                                <th>Профит</th>
-                                <th>Акции</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const defaultData = [
-            {
-                id: 1,
-                product: "Лаптоп Lenovo",
-                buyQty: 10,
-                buyPrice: 25000,
-                sellQty: 6,
-                sellPrice: 31000
-            }
-        ];
-
-        let products = [];
-
-        function loadProducts() {
-            const stored = localStorage.getItem('products_v2');
-            if (stored) {
-                try {
-                    products = JSON.parse(stored);
-                } catch(e) {
-                    products = defaultData;
-                }
-            } else {
-                products = defaultData;
-            }
-            renderTable();
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('products_v2', JSON.stringify(products));
-            renderTable();
-        }
-
-        function renderTable() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-
-            if (products.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Нема внесено податоци</td></tr>';
-                return;
-            }
-
-            products.forEach(function(p, index) {
-                const totalBuy = p.buyQty * p.buyPrice;
-                const totalRevenue = p.sellQty * p.sellPrice;
-                const stock = p.buyQty - p.sellQty;
-                const profit = totalRevenue - (p.sellQty * p.buyPrice);
-                const profitClass = profit >= 0 ? 'badge-profit-pos' : 'badge-profit-neg';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = 
-                    '<td>' + (index + 1) + '</td>' +
-                    '<td><strong>' + p.product + '</strong></td>' +
-                    '<td>' + p.buyQty + '</td>' +
-                    '<td>' + p.buyPrice.toFixed(2) + ' ден</td>' +
-                    '<td>' + totalBuy.toFixed(2) + ' ден</td>' +
-                    '<td>' + p.sellQty + '</td>' +
-                    '<td>' + p.sellPrice.toFixed(2) + ' ден</td>' +
-                    '<td>' + totalRevenue.toFixed(2) + ' ден</td>' +
-                    '<td><strong>' + stock + '</strong></td>' +
-                    '<td class="' + profitClass + '">' + profit.toFixed(2) + ' ден</td>' +
-                    '<td><button class="btn btn-danger" onclick="deleteProduct(' + p.id + ')">Избриши</button></td>';
+        
+            
+                Внес на Продукт
                 
-                tableBody.appendChild(tr);
-            });
-        }
+                    
+                        Продукт:
+                        
+                    
+                    
+                        
+                            Купена количина:
+                            
+                        
+                        
+                            Набавна цена (ден):
+                            
+                        
+                    
+                    
+                        
+                            Продадено количество:
+                            
+                        
+                        
+                            Продажна цена (ден):
+                            
+                        
+                    
+                    Зачувај во База
+                
+            
 
-        document.getElementById('productForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+            
+                Преглед на Залиха и Профит
+                
+                    
+                        
+                            
+                                #
+                                Продукт
+                                Купено
+                                Набавна
+                                Вкупно Набавено
+                                Продадено
+                                Продажна
+                                Вкупен Приход
+                                Залиха
+                                Профит
+                                Акции
+                            
+                        
+                        
+                            Се вчитува од база...
+                        
+                    
+                
+            
+        
+    
 
-            const buyQty = parseInt(document.getElementById('buyQty').value) || 0;
-            const sellQty = parseInt(document.getElementById('sellQty').value) || 0;
+    
 
-            if (sellQty > buyQty) {
-                alert('Грешка: Продаденото количество не може да биде поголемо од купената количина!');
-                return;
-            }
 
-            const newProduct = {
-                id: Date.now(),
-                product: document.getElementById('product').value,
-                buyQty: buyQty,
-                buyPrice: parseFloat(document.getElementById('buyPrice').value) || 0,
-                sellQty: sellQty,
-                sellPrice: parseFloat(document.getElementById('sellPrice').value) || 0
-            };
-
-            products.push(newProduct);
-            saveAndRender();
-            this.reset();
-        });
-
-        function deleteProduct(id) {
-            products = products.filter(function(p) { return p.id !== id; });
-            saveAndRender();
-        }
-
-        document.getElementById('downloadJsonBtn').addEventListener('click', function() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 4));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "data.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        });
-
-        loadProducts();
-    </script>
-</body>
-</html>
