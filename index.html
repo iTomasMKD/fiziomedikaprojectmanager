@@ -4,35 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fizio Medika - Product Manager</title>
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f7fe; color: #2b3674; padding: 24px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f4f7fe; color: #2b3674; padding: 24px; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Login Screen Styling */
+        #loginScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .login-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .login-card h2 {
+            font-size: 22px;
+            color: #1b2559;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .login-card p {
+            color: #8f9bba;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .error-msg {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+            font-weight: 600;
+        }
+
+        /* Dashboard View */
+        #dashboardScreen { display: none; }
         .header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { font-size: 26px; color: #1b2559; font-weight: 700; }
+        .header-actions { display: flex; align-items: center; gap: 16px; }
         .header .status { background: #e6f4ea; color: #137333; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .header .status-dot { width: 8px; height: 8px; background: #137333; border-radius: 50%; }
+
+        /* Grid & Forms */
         .dashboard-grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        
         .card { background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03); }
-        .card h2 { font-size: 18px; margin-bottom: 20px; color: #1b2559; font-weight: 600; }
-        .form-group { margin-bottom: 16px; }
+        .card h2 { font-size: 18px; margin-bottom: 20px; color: #1b2559; font-weight: 600; text-align: left; }
+        
+        .form-group { margin-bottom: 16px; text-align: left; }
         .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
         .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #2b3674; }
         .form-group input { width: 100%; padding: 12px; border: 1px solid #e0e5f2; border-radius: 10px; outline: none; font-size: 14px; transition: 0.2s; background: #fcfdfe; }
         .form-group input:focus { border-color: #4318ff; background: #fff; box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.1); }
+        
         .btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
         .btn-primary { background-color: #4318ff; color: white; width: 100%; margin-top: 8px; }
         .btn-primary:hover { background-color: #3311cc; }
+        .btn-secondary { background-color: #e0e5f2; color: #2b3674; }
+        .btn-secondary:hover { background-color: #d1d9e8; }
         .btn-danger { background-color: #ffe8e8; color: #ea5455; padding: 6px 12px; font-size: 12px; }
         .btn-danger:hover { background-color: #ea5455; color: white; }
+        
+        /* Table */
         .table-responsive { overflow-x: auto; margin-top: 8px; }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
         th { background-color: #f8fafc; color: #8f9bba; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         td { color: #1b2559; }
+        
         .badge-profit-pos { color: #2e7d32; font-weight: 700; background: #e8f5e9; padding: 4px 8px; border-radius: 6px; }
         .badge-profit-neg { color: #c62828; font-weight: 700; background: #ffebee; padding: 4px 8px; border-radius: 6px; }
         .stock-badge { background: #f0f3ff; color: #4318ff; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
@@ -40,78 +93,152 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Fizio Medika - Управување со Залиха</h1>
-            <div class="status"><span class="status-dot"></span> Поврзано со Supabase</div>
-        </div>
-        <div class="dashboard-grid">
-            <div class="card form-card">
-                <h2>Внес на Нов Продукт</h2>
-                <form id="productForm">
+        
+        <!-- LOGIN VIEW -->
+        <div id="loginScreen">
+            <div class="login-card">
+                <h2>Fizio Medika</h2>
+                <p>Внесете кориснички податоци за најава</p>
+                <div id="errorMsg" class="error-msg">Погрешно корисничко име или лозинка!</div>
+                <form id="loginForm">
                     <div class="form-group">
-                        <label for="product">Име на продукт:</label>
-                        <input type="text" id="product" required placeholder="Нпр. Медицинска крема">
+                        <label for="username">Корисничко име:</label>
+                        <input type="text" id="username" required placeholder="admin" autocomplete="off">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="buyQty">Купено кол.:</label>
-                            <input type="number" id="buyQty" min="0" required placeholder="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="buyPrice">Набавна цена (ден):</label>
-                            <input type="number" id="buyPrice" step="0.01" min="0" required placeholder="0.00">
-                        </div>
+                    <div class="form-group">
+                        <label for="password">Лозинка:</label>
+                        <input type="password" id="password" required placeholder="••••••••">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="sellQty">Продадено кол.:</label>
-                            <input type="number" id="sellQty" min="0" required placeholder="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="sellPrice">Продажна цена (ден):</label>
-                            <input type="number" id="sellPrice" step="0.01" min="0" required placeholder="0.00">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Зачувај во База</button>
+                    <button type="submit" class="btn btn-primary">Најави се</button>
                 </form>
             </div>
-            <div class="card table-card">
-                <h2>Залиха и Финансиски Преглед</h2>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Продукт</th>
-                                <th>Купено</th>
-                                <th>Набавна</th>
-                                <th>Вкупно Набавено</th>
-                                <th>Продадено</th>
-                                <th>Продажна</th>
-                                <th>Вкупен Приход</th>
-                                <th>Залиха</th>
-                                <th>Профит</th>
-                                <th>Акции</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <tr><td colspan="11" style="text-align:center;">Се вчитува од база...</td></tr>
-                        </tbody>
-                    </table>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboardScreen">
+            <div class="header">
+                <h1>Fizio Medika - Управување со Залиха</h1>
+                <div class="header-actions">
+                    <div class="status"><span class="status-dot"></span> Поврзано со Supabase</div>
+                    <button onclick="logout()" class="btn btn-secondary">Одјави се</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="card form-card">
+                    <h2>Внес на Нов Продукт</h2>
+                    <form id="productForm">
+                        <div class="form-group">
+                            <label for="product">Име на продукт:</label>
+                            <input type="text" id="product" required placeholder="Нпр. Медицинска крема">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="buyQty">Купено кол.:</label>
+                                <input type="number" id="buyQty" min="0" required placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="buyPrice">Набавна цена (ден):</label>
+                                <input type="number" id="buyPrice" step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sellQty">Продадено кол.:</label>
+                                <input type="number" id="sellQty" min="0" required placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="sellPrice">Продажна цена (ден):</label>
+                                <input type="number" id="sellPrice" step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Зачувај во База</button>
+                    </form>
+                </div>
+
+                <div class="card table-card">
+                    <h2>Залиха и Финансиски Преглед</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Продукт</th>
+                                    <th>Купено</th>
+                                    <th>Набавна</th>
+                                    <th>Вкупно Набавено</th>
+                                    <th>Продадено</th>
+                                    <th>Продажна</th>
+                                    <th>Вкупен Приход</th>
+                                    <th>Залиха</th>
+                                    <th>Профит</th>
+                                    <th>Акции</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr><td colspan="11" style="text-align:center;">Се вчитува од база...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+
     <script>
+        // SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://xaftllqkxexkncsyknqj.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_fSWR0RKboNSmBu3WGE1Byg_xayjPi_B';
         let supabaseClient;
-        if (window.supabase) { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
+        // LOGIN SYSTEM
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            if (user === 'admin' && pass === 'dadofiziomedika') {
+                sessionStorage.setItem('fm_is_logged_in', 'true');
+                document.getElementById('errorMsg').style.display = 'none';
+                showDashboard();
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        });
+
+        function checkAuth() {
+            if (sessionStorage.getItem('fm_is_logged_in') === 'true') {
+                showDashboard();
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('dashboardScreen').style.display = 'none';
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            fetchProducts();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('fm_is_logged_in');
+            location.reload();
+        }
+
+        // DATABASE OPERATIONS
         async function fetchProducts() {
             if (!supabaseClient) return;
             const { data, error } = await supabaseClient.from('products').select('*').order('id', { ascending: true });
-            if (error) { console.error('Error:', error); return; }
+            if (error) { 
+                console.error('Error:', error); 
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="11" style="text-align:center; color:red;">Грешка при вчитување од база!</td></tr>';
+                return; 
+            }
             renderTable(data);
         }
 
@@ -171,7 +298,9 @@
                 if (!error) fetchProducts();
             }
         }
-        fetchProducts();
+
+        // START APP
+        checkAuth();
     </script>
 </body>
 </html>
