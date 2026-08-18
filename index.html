@@ -1,76 +1,177 @@
-﻿
+﻿<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fizio Medika - Product Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7fe; color: #2b3674; padding: 24px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 26px; color: #1b2559; font-weight: 700; }
+        .header .status { background: #e6f4ea; color: #137333; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .header .status-dot { width: 8px; height: 8px; background: #137333; border-radius: 50%; }
+        .dashboard-grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+        @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .card { background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03); }
+        .card h2 { font-size: 18px; margin-bottom: 20px; color: #1b2559; font-weight: 600; }
+        .form-group { margin-bottom: 16px; }
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #2b3674; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #e0e5f2; border-radius: 10px; outline: none; font-size: 14px; transition: 0.2s; background: #fcfdfe; }
+        .form-group input:focus { border-color: #4318ff; background: #fff; box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.1); }
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        .btn-primary { background-color: #4318ff; color: white; width: 100%; margin-top: 8px; }
+        .btn-primary:hover { background-color: #3311cc; }
+        .btn-danger { background-color: #ffe8e8; color: #ea5455; padding: 6px 12px; font-size: 12px; }
+        .btn-danger:hover { background-color: #ea5455; color: white; }
+        .table-responsive { overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        th { background-color: #f8fafc; color: #8f9bba; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { color: #1b2559; }
+        .badge-profit-pos { color: #2e7d32; font-weight: 700; background: #e8f5e9; padding: 4px 8px; border-radius: 6px; }
+        .badge-profit-neg { color: #c62828; font-weight: 700; background: #ffebee; padding: 4px 8px; border-radius: 6px; }
+        .stock-badge { background: #f0f3ff; color: #4318ff; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Fizio Medika - Управување со Залиха</h1>
+            <div class="status"><span class="status-dot"></span> Поврзано со Supabase</div>
+        </div>
+        <div class="dashboard-grid">
+            <div class="card form-card">
+                <h2>Внес на Нов Продукт</h2>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="product">Име на продукт:</label>
+                        <input type="text" id="product" required placeholder="Нпр. Медицинска крема">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="buyQty">Купено кол.:</label>
+                            <input type="number" id="buyQty" min="0" required placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="buyPrice">Набавна цена (ден):</label>
+                            <input type="number" id="buyPrice" step="0.01" min="0" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sellQty">Продадено кол.:</label>
+                            <input type="number" id="sellQty" min="0" required placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="sellPrice">Продажна цена (ден):</label>
+                            <input type="number" id="sellPrice" step="0.01" min="0" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зачувај во База</button>
+                </form>
+            </div>
+            <div class="card table-card">
+                <h2>Залиха и Финансиски Преглед</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Продукт</th>
+                                <th>Купено</th>
+                                <th>Набавна</th>
+                                <th>Вкупно Набавено</th>
+                                <th>Продадено</th>
+                                <th>Продажна</th>
+                                <th>Вкупен Приход</th>
+                                <th>Залиха</th>
+                                <th>Профит</th>
+                                <th>Акции</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr><td colspan="11" style="text-align:center;">Се вчитува од база...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const SUPABASE_URL = 'https://xaftllqkxexkncsyknqj.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_fSWR0RKboNSmBu3WGE1Byg_xayjPi_B';
+        let supabaseClient;
+        if (window.supabase) { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
 
+        async function fetchProducts() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient.from('products').select('*').order('id', { ascending: true });
+            if (error) { console.error('Error:', error); return; }
+            renderTable(data);
+        }
 
-    
-    
-    Product Manager Dashboard - Live DB
-    
-    
+        function renderTable(products) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            if (!products || products.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Нема внесено производи во базата.</td></tr>';
+                return;
+            }
+            products.forEach(function(p, index) {
+                const totalBuy = p.buy_qty * p.buy_price;
+                const totalRevenue = p.sell_qty * p.sell_price;
+                const stock = p.buy_qty - p.sell_qty;
+                const profit = totalRevenue - (p.sell_qty * p.buy_price);
+                const profitClass = profit >= 0 ? 'badge-profit-pos' : 'badge-profit-neg';
 
+                const tr = document.createElement('tr');
+                tr.innerHTML = 
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td><strong>' + p.product + '</strong></td>' +
+                    '<td>' + p.buy_qty + '</td>' +
+                    '<td>' + Number(p.buy_price).toFixed(2) + ' ден</td>' +
+                    '<td>' + totalBuy.toFixed(2) + ' ден</td>' +
+                    '<td>' + p.sell_qty + '</td>' +
+                    '<td>' + Number(p.sell_price).toFixed(2) + ' ден</td>' +
+                    '<td>' + totalRevenue.toFixed(2) + ' ден</td>' +
+                    '<td><span class="stock-badge">' + stock + '</span></td>' +
+                    '<td><span class="' + profitClass + '">' + (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' ден</span></td>' +
+                    '<td><button class="btn btn-danger" onclick="deleteProduct(' + p.id + ')">Избриши</button></td>';
+                tableBody.appendChild(tr);
+            });
+        }
 
-    
-        Dashboard - База во Облак (Трајни Податоци)
-        
-        
-            
-                Внес на Продукт
-                
-                    
-                        Продукт:
-                        
-                    
-                    
-                        
-                            Купена количина:
-                            
-                        
-                        
-                            Набавна цена (ден):
-                            
-                        
-                    
-                    
-                        
-                            Продадено количество:
-                            
-                        
-                        
-                            Продажна цена (ден):
-                            
-                        
-                    
-                    Зачувај во База
-                
-            
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const buyQty = parseInt(document.getElementById('buyQty').value) || 0;
+            const sellQty = parseInt(document.getElementById('sellQty').value) || 0;
+            if (sellQty > buyQty) { alert('Грешка: Продаденото количество не може да биде поголемо од купеното!'); return; }
 
-            
-                Преглед на Залиха и Профит
-                
-                    
-                        
-                            
-                                #
-                                Продукт
-                                Купено
-                                Набавна
-                                Вкупно Набавено
-                                Продадено
-                                Продажна
-                                Вкупен Приход
-                                Залиха
-                                Профит
-                                Акции
-                            
-                        
-                        
-                            Се вчитува од база...
-                        
-                    
-                
-            
-        
-    
+            const newProduct = {
+                product: document.getElementById('product').value,
+                buy_qty: buyQty,
+                buy_price: parseFloat(document.getElementById('buyPrice').value) || 0,
+                sell_qty: sellQty,
+                sell_price: parseFloat(document.getElementById('sellPrice').value) || 0
+            };
 
-    
+            const { error } = await supabaseClient.from('products').insert([newProduct]);
+            if (error) { alert('Грешка при запис во база!'); console.error(error); } 
+            else { this.reset(); fetchProducts(); }
+        });
 
-
+        async function deleteProduct(id) {
+            if (confirm('Дали сте сигурни за бришење?')) {
+                const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                if (!error) fetchProducts();
+            }
+        }
+        fetchProducts();
+    </script>
+</body>
+</html>
